@@ -1,0 +1,155 @@
+
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #ffffff;
+    color: #0f1111;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    padding: 14px;
+}
+
+.cabecalho {
+    margin-top: 10px;
+    margin-bottom: 18px;
+}
+
+.logotipo {
+    width: 103px;
+    height: auto;
+    display: block;
+}
+
+.bloco-central {
+    width: 100%;
+    max-width: 350px;
+    display: flex;
+    flex-direction: column;
+}
+
+.caixa-login {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px 26px;
+    background-color: #ffffff;
+}
+
+.caixa-login h1 {
+    font-size: 28px;
+    font-weight: 400;
+    margin-bottom: 15px;
+}
+
+.caixa-login .campo {
+    display: flex;
+    flex-direction: column;
+}
+
+.caixa-login label {
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 5px;
+}
+
+.caixa-login input {
+    height: 31px;
+    padding: 3px 7px;
+    font-size: 13px;
+    border: 1px solid #a6a6a6;
+    border-radius: 3px;
+    margin-bottom: 14px;
+    outline: none;
+}
+
+
+.botao-primario {
+    background-color: #ffd814;
+    border: 1px solid #fcd200;
+    border-radius: 8px;
+    height: 31px;
+    font-size: 13px;
+    color: #0f1111;
+    cursor: pointer;
+}
+
+
+.termos {
+    font-size: 12px;
+    line-height: 1.5;
+    margin-top: 18px;
+    margin-bottom: 22px;
+}
+
+.termos a {
+    color: #0066c0;
+    text-decoration: none;
+}
+
+
+
+.link-ajuda a {
+    font-size: 13px;
+    color: #0066c0;
+    text-decoration: none;
+}
+
+.divisor {
+    text-align: center;
+    position: relative;
+    margin-top: 22px;
+    margin-bottom: 14px;
+}
+
+
+.divisor span {
+    position: relative;
+    z-index: 2;
+    background-color: #ffffff;
+    padding: 0 8px;
+    font-size: 12px;
+    color: #767676;
+}
+
+.botao-secundario {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #ffffff;
+    border: 1px solid #d5d9d9;
+    border-radius: 8px;
+    height: 31px;
+    font-size: 13px;
+    color: #0f1111;
+    text-decoration: none;
+    box-shadow: 0 2px 5px 0 rgba(213, 217, 217, 0.5);
+}
+
+.rodape {
+    margin-top: 26px;
+    padding-top: 26px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    border-top: 1px solid #e7e7e7;
+}
+
+.links-rodape {
+    display: flex;
+    gap: 20px;
+}
+
+.links-rodape a {
+    font-size: 11px;
+    color: #0066c0;
+    text-decoration: none;
+}
+
+
+.direitos-autorais {
+    font-size: 11px;
+    color: #555555;
+}
