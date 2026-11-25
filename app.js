@@ -14,6 +14,8 @@ const usernameInput = document.querySelector('#username');
 const passwordInput = document.querySelector('#password');
 const categoryFilter = document.querySelector('#category-filter');
 const searchInput = document.querySelector('#search-input');
+const searchCategory = document.querySelector('#search-category');
+const searchMessage = document.querySelector('#search-message');
 const grid = document.querySelector('#product-grid');
 let products = [];
 let cartCount = 0;
@@ -74,11 +76,20 @@ document.querySelector('#logout-button').addEventListener('click', () => {
 });
 
 document.querySelector('#retry-button').addEventListener('click', loadProducts);
-categoryFilter.addEventListener('change', renderProducts);
-document.querySelector('#search-form').addEventListener('submit', (event) => {
+categoryFilter.addEventListener('change', () => searchProducts(categoryFilter.value));
+document.querySelector('#search-form').addEventListener('submit', async (event) => {
   event.preventDefault();
-  renderProducts();
-  document.querySelector('#catalog-title').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  searchMessage.textContent = '';
+  const termo = searchInput.value.trim();
+
+  if (termo.length < 3) {
+    searchMessage.textContent = 'Digite pelo menos 3 caracteres para pesquisar.';
+    searchInput.focus();
+    return;
+  }
+
+  await searchProducts(searchCategory.value);
+  document.querySelector('#ofertas').scrollIntoView({ behavior: 'smooth', block: 'start' });
 });
 document.querySelector('#cart-button').addEventListener('click', () => {
   showToast(cartCount ? `${cartCount} ${cartCount === 1 ? 'item' : 'itens'} no carrinho.` : 'Seu carrinho está vazio por enquanto.');
@@ -106,12 +117,34 @@ async function loadProducts() {
     if (!response.ok) throw new Error('Falha ao carregar os produtos.');
     products = await response.json();
     const categories = [...new Set(products.map(product => product.category))];
-    categoryFilter.innerHTML = '<option value="all">Todas as categorias</option>' + categories.map(category => `<option value="${escapeHtml(category)}">${escapeHtml(category)}</option>`).join('');
+    const options = categories.map(category => `<option value="${escapeHtml(category)}">${escapeHtml(category)}</option>`).join('');
+    categoryFilter.innerHTML = '<option value="all">Todas as categorias</option>' + options;
+    searchCategory.innerHTML = '<option value="all">Todos</option>' + options;
     renderProducts();
   } catch {
     grid.innerHTML = '';
     document.querySelector('#results-count').textContent = '';
     document.querySelector('#catalog-error').classList.remove('is-hidden');
+  }
+}
+
+// a categoria vai na URL da API (/products/category/xxx), o texto é filtrado depois
+async function searchProducts(category) {
+  let url = PRODUCTS_API;
+  if (category !== 'all') url = `${PRODUCTS_API}/category/${encodeURIComponent(category)}`;
+
+  searchMessage.textContent = '';
+  document.querySelector('#results-count').textContent = 'Buscando...';
+  try {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error();
+    products = await response.json();
+    categoryFilter.value = category;
+    searchCategory.value = category;
+    renderProducts();
+  } catch {
+    document.querySelector('#results-count').textContent = '';
+    searchMessage.textContent = 'Não foi possível fazer a busca agora. Tente de novo.';
   }
 }
 
