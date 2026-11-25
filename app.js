@@ -17,9 +17,20 @@ const searchInput = document.querySelector('#search-input');
 const searchCategory = document.querySelector('#search-category');
 const searchMessage = document.querySelector('#search-message');
 const grid = document.querySelector('#product-grid');
+const favoritesTab = document.querySelector('#favorites-tab');
+const favoritesCount = document.querySelector('#favorites-count');
+const sectionTitle = document.querySelector('#section-title');
 let products = [];
-let cartCount = 0;
+const cartItems = new Map();
+let favorites = new Set();
+let showingFavorites = false;
 let toastTimer;
+
+try {
+  favorites = new Set(JSON.parse(localStorage.getItem('store-demo-favorites') || '[]').map(String));
+} catch {
+  localStorage.removeItem('store-demo-favorites');
+}
 
 loginForm.addEventListener('submit', async (event) => {
   event.preventDefault();
@@ -44,7 +55,6 @@ loginForm.addEventListener('submit', async (event) => {
     if (!response.ok) throw new Error('Usuário ou senha inválidos. Confira as credenciais de demonstração.');
     const data = await response.json();
     if (!data.token) throw new Error('A API não retornou uma sessão válida. Tente novamente.');
-    sessionStorage.setItem('store-demo-user', usernameInput.value.trim());
     await showCatalog(usernameInput.value.trim());
   } catch (error) {
     loginMessage.textContent = error instanceof TypeError ? 'Não foi possível conectar à API. Confira sua conexão e tente novamente.' : error.message;
@@ -60,7 +70,8 @@ document.querySelector('#toggle-password').addEventListener('click', () => {
 });
 
 document.querySelector('#logout-button').addEventListener('click', () => {
-  sessionStorage.removeItem('store-demo-user');
+  cartItems.clear();
+  updateCartDisplay();
   catalogStage.classList.add('is-hidden');
   storeHeader.classList.add('is-hidden');
   storeNav.classList.add('is-hidden');
@@ -77,6 +88,33 @@ document.querySelector('#logout-button').addEventListener('click', () => {
 
 document.querySelector('#retry-button').addEventListener('click', loadProducts);
 categoryFilter.addEventListener('change', () => searchProducts(categoryFilter.value));
+document.querySelector('.brand').addEventListener('click', event => {
+  event.preventDefault();
+  showingFavorites = false;
+  favoritesTab.setAttribute('aria-pressed', 'false');
+  sectionTitle.textContent = 'Explore nossos produtos';
+  categoryFilter.disabled = false;
+  searchCategory.disabled = false;
+  categoryFilter.value = 'all';
+  searchCategory.value = 'all';
+  searchInput.value = '';
+  searchMessage.textContent = '';
+  renderProducts();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+favoritesTab.addEventListener('click', () => {
+  showingFavorites = !showingFavorites;
+  if (showingFavorites) {
+    categoryFilter.value = 'all';
+    searchCategory.value = 'all';
+  }
+  favoritesTab.setAttribute('aria-pressed', String(showingFavorites));
+  sectionTitle.textContent = showingFavorites ? 'Seus produtos favoritos' : 'Explore nossos produtos';
+  categoryFilter.disabled = showingFavorites;
+  searchCategory.disabled = showingFavorites;
+  searchMessage.textContent = '';
+  renderProducts();
+});
 document.querySelector('#search-form').addEventListener('submit', async (event) => {
   event.preventDefault();
   searchMessage.textContent = '';
@@ -88,11 +126,16 @@ document.querySelector('#search-form').addEventListener('submit', async (event) 
     return;
   }
 
-  await searchProducts(searchCategory.value);
+  await searchProducts(termo, searchCategory.value);
   document.querySelector('#ofertas').scrollIntoView({ behavior: 'smooth', block: 'start' });
 });
 document.querySelector('#cart-button').addEventListener('click', () => {
-  showToast(cartCount ? `${cartCount} ${cartCount === 1 ? 'item' : 'itens'} no carrinho.` : 'Seu carrinho está vazio por enquanto.');
+  if (!cartItems.size) {
+    showToast('Seu carrinho está vazio por enquanto.');
+    return;
+  }
+  const summary = [...cartItems.values()].map(({ title, quantity }) => `${title} (${quantity})`).join('; ');
+  showToast(`Carrinho: ${summary}`);
 });
 
 
@@ -116,6 +159,7 @@ async function loadProducts() {
     const response = await fetch(PRODUCTS_API);
     if (!response.ok) throw new Error('Falha ao carregar os produtos.');
     products = await response.json();
+    updateFavoritesCount();
     const categories = [...new Set(products.map(product => product.category))];
     const options = categories.map(category => `<option value="${escapeHtml(category)}">${escapeHtml(category)}</option>`).join('');
     categoryFilter.innerHTML = '<option value="all">Todas as categorias</option>' + options;
@@ -128,21 +172,20 @@ async function loadProducts() {
   }
 }
 
-// a categoria vai na URL da API (/products/category/xxx), o texto é filtrado depois
-async function searchProducts(category) {
-  let url = PRODUCTS_API;
-  if (category !== 'all') url = `${PRODUCTS_API}/category/${encodeURIComponent(category)}`;
-
+async function searchProducts(term, category) {
   searchMessage.textContent = '';
-  document.querySelector('#results-count').textContent = 'Buscando...';
+  const endpoint = category === 'all' ? PRODUCTS_API : `${PRODUCTS_API}/category/${encodeURIComponent(category)}`;
+  const params = new URLSearchParams({ limit: '20', search: term });
   try {
-    const response = await fetch(url);
-    if (!response.ok) throw new Error();
+    const response = await fetch(`${endpoint}?${params.toString()}`);
+    if (!response.ok) throw new Error('Falha na busca de produtos.');
     products = await response.json();
     categoryFilter.value = category;
     searchCategory.value = category;
+    updateFavoritesCount();
     renderProducts();
   } catch {
+    grid.innerHTML = '';
     document.querySelector('#results-count').textContent = '';
     searchMessage.textContent = 'Não foi possível fazer a busca agora. Tente de novo.';
   }
@@ -152,32 +195,57 @@ function renderProducts() {
   const term = searchInput.value.trim().toLocaleLowerCase('pt-BR');
   const category = categoryFilter.value;
   const filtered = products.filter(product =>
-    (category === 'all' || product.category === category) &&
+    (!showingFavorites || favorites.has(String(product.id))) &&
+    (showingFavorites || category === 'all' || product.category === category) &&
     (!term || `${product.title} ${product.description} ${product.category}`.toLocaleLowerCase('pt-BR').includes(term))
   );
   document.querySelector('#results-count').textContent = `${filtered.length} ${filtered.length === 1 ? 'produto encontrado' : 'produtos encontrados'}`;
   if (!filtered.length) {
-    grid.innerHTML = '<div class="catalog-error"><p>Nenhum produto encontrado. Tente outra busca ou categoria.</p></div>';
+    const emptyMessage = showingFavorites ? 'Você ainda não salvou favoritos. Toque no coração de um produto para encontrá-lo aqui.' : 'Nenhum produto encontrado. Tente outra busca ou categoria.';
+    grid.innerHTML = `<div class="catalog-error"><p>${emptyMessage}</p></div>`;
     return;
   }
   grid.innerHTML = filtered.map((product, index) => `
     <article class="product-card" style="--card-index:${Math.min(index, 12)}">
-      <div class="product-image-wrap"><img src="${escapeHtml(product.image)}" alt="${escapeHtml(product.title)}" loading="lazy"><span class="product-category">${escapeHtml(product.category)}</span></div>
+      <div class="product-image-wrap"><img src="${escapeHtml(product.image)}" alt="${escapeHtml(product.title)}" loading="lazy"><span class="product-category">${escapeHtml(product.category)}</span><button type="button" class="favorite-button${favorites.has(String(product.id)) ? ' is-favorite' : ''}" data-favorite="${product.id}" aria-label="${favorites.has(String(product.id)) ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}" aria-pressed="${favorites.has(String(product.id))}">${favorites.has(String(product.id)) ? '♥' : '♡'}</button></div>
       <div class="product-info"><h3>${escapeHtml(product.title)}</h3><p class="rating"><span>${'★'.repeat(Math.round(product.rating?.rate || 0))}${'☆'.repeat(5 - Math.round(product.rating?.rate || 0))}</span> <small>${product.rating?.count || 0}</small></p><p class="price"><sup>US$</sup>${Number(product.price).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p><button class="add-button" data-product="${product.id}">Adicionar ao carrinho</button></div>
     </article>`).join('');
   grid.querySelectorAll('.add-button').forEach(button => button.addEventListener('click', () => {
-    cartCount++;
-    document.querySelector('#cart-count').textContent = cartCount;
-    document.querySelector('#cart-button').setAttribute('aria-label', `Carrinho, ${cartCount} itens`);
+    const product = products.find(item => String(item.id) === button.dataset.product);
+    if (!product) return;
+    const current = cartItems.get(product.id) || { title: product.title, quantity: 0 };
+    current.quantity++;
+    cartItems.set(product.id, current);
+    updateCartDisplay();
     button.classList.add('added');
     button.textContent = 'Adicionado';
     showToast('Produto adicionado ao carrinho.');
   }));
+  grid.querySelectorAll('.favorite-button').forEach(button => button.addEventListener('click', () => {
+    const id = button.dataset.favorite;
+    if (favorites.has(id)) favorites.delete(id);
+    else favorites.add(id);
+    localStorage.setItem('store-demo-favorites', JSON.stringify([...favorites]));
+    updateFavoritesCount();
+    renderProducts();
+    showToast(favorites.has(id) ? 'Produto adicionado aos favoritos.' : 'Produto removido dos favoritos.');
+  }));
+}
+
+function updateFavoritesCount() {
+  const availableIds = new Set(products.map(product => String(product.id)));
+  favoritesCount.textContent = [...favorites].filter(id => availableIds.has(id)).length;
 }
 
 function setBusy(busy) {
   loginButton.disabled = busy;
   loginButton.textContent = busy ? 'Verificando...' : 'Entrar';
+}
+
+function updateCartDisplay() {
+  const count = [...cartItems.values()].reduce((total, item) => total + item.quantity, 0);
+  document.querySelector('#cart-count').textContent = count;
+  document.querySelector('#cart-button').setAttribute('aria-label', `Carrinho, ${count} ${count === 1 ? 'item' : 'itens'}`);
 }
 
 function escapeHtml(value) {
@@ -191,6 +259,3 @@ function showToast(message) {
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => toast.classList.remove('visible'), 2400);
 }
-
-const savedUser = sessionStorage.getItem('store-demo-user');
-if (savedUser) showCatalog(savedUser);

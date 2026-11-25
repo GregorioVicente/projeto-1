@@ -43,20 +43,21 @@ body {
 .links-rodape a { font-size: 11px; color: #0066c0; text-decoration: none; }
 .direitos-autorais { margin: 0; font-size: 11px; color: #555; text-align: center; }
 .is-hidden { display: none !important; }/* A área de login mantém as dimensões e o alinhamento do layout original. */
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 body.is-shopping { align-items: stretch; background: #f3f3f3; padding: 0; }
 body.is-shopping .app-shell { min-height: 100vh; align-items: stretch; }
-.topbar { min-height: 62px; padding: 0 clamp(14px, 3vw, 38px); display: flex; align-items: center; gap: 22px; background: #131921; color: #fff; }
+.topbar { min-height: 62px; padding: 0 clamp(14px, 3vw, 38px); display: grid; grid-template-columns: max-content max-content minmax(0, 1fr) max-content max-content; align-items: center; column-gap: 16px; background: #131921; color: #fff; }
 .brand { position: relative; flex: 0 0 auto; padding: 3px 6px; color: #fff; text-decoration: none; font-size: 25px; font-weight: 700; letter-spacing: -1.8px; }
 .brand i { position: absolute; right: 8px; bottom: -4px; width: 32px; height: 8px; border-bottom: 3px solid #ff9900; border-radius: 0 0 60% 60%; font-size: 0; }
 .delivery, .account-label { display: flex; align-items: center; gap: 5px; white-space: nowrap; }
 .delivery small, .account-label small { display: block; color: #d5d9d9; font-size: 11px; }
 .delivery strong, .account-label strong { display: block; color: #fff; font-size: 13px; }
 .pin { font-size: 21px; }
-.search { height: 38px; display: flex; flex: 1; min-width: 100px; overflow: hidden; border-radius: 5px; }
+.search { width: 100%; height: 40px; min-width: 0; margin: 0; display: flex; align-self: center; align-items: stretch; overflow: hidden; border-radius: 5px; }
 .search:focus-within { outline: 3px solid #ff9900; }
-.search select { width: 72px; border: 0; padding: 0 6px; background: #e6e6e6; }
-.search input { flex: 1; min-width: 0; margin: 0; padding: 0 10px; border: 0; border-radius: 0; outline: 0; font-size: 14px; }
-.search button { width: 44px; border: 0; background: #febd69; font-size: 24px; cursor: pointer; }
+.search select { flex: 0 0 72px; height: 100%; margin: 0; border: 0; padding: 0 6px; background: #e6e6e6; }
+.search input { flex: 1 1 auto; width: 0; min-width: 0; height: 100%; margin: 0; padding: 0 10px; border: 0; border-radius: 0; outline: 0; font-size: 14px; line-height: normal; }
+.search button { flex: 0 0 44px; height: 100%; margin: 0; border: 0; background: #febd69; font-size: 24px; line-height: 1; cursor: pointer; }
 .cart { position: relative; display: flex; align-items: flex-end; gap: 4px; padding: 4px 0; border: 0; background: none; color: #fff; white-space: nowrap; cursor: pointer; }
 .cart span { font-size: 25px; }
 .cart b { position: absolute; top: -2px; left: 15px; color: #ff9900; font-size: 14px; }
@@ -64,6 +65,9 @@ body.is-shopping .app-shell { min-height: 100vh; align-items: stretch; }
 .subnav { min-height: 38px; display: flex; align-items: center; gap: 20px; padding: 0 clamp(14px, 3vw, 38px); overflow: auto; background: #232f3e; color: #fff; white-space: nowrap; }
 .subnav a, .subnav button { border: 0; padding: 0; background: none; color: #fff; font-size: 12px; text-decoration: none; cursor: pointer; }
 .subnav button { font-weight: 700; }
+.subnav .nav-tab { display: inline-flex; align-items: center; gap: 5px; font-weight: 500; }
+.nav-tab[aria-pressed="true"] { color: #ffbd69; }
+.nav-tab span { color: #ffbd69; }
 .nav-promo { margin-left: auto; font-size: 12px; font-weight: 700; }
 body.is-shopping main { width: min(1180px, 100%); margin: 0 auto; padding: 30px 24px 42px; flex: 1; }
 body.is-shopping .rodape { margin-top: 0; padding: 24px 14px 18px; border-top: 1px solid #d5d9d9; background: #fff; }
@@ -99,6 +103,10 @@ body.is-shopping .links-rodape { padding-top: 0; border: 0; }
 .add-button { width: 100%; min-height: 32px; border: 1px solid #fcd200; border-radius: 16px; background: #ffd814; font-size: 10px; font-weight: 700; cursor: pointer; }
 .add-button:hover { background: #f7ca00; }
 .add-button.added { border-color: #b9d5c4; background: #e7f4eb; color: #24643a; }
+.product-image-wrap { isolation: isolate; }
+.favorite-button { position: absolute; z-index: 1; top: 7px; right: 8px; width: 30px; height: 30px; display: grid; place-items: center; border: 1px solid #e0e4e8; border-radius: 50%; background: #fff; color: #526171; font-size: 18px; line-height: 1; cursor: pointer; box-shadow: 0 1px 4px #25364a18; }
+.favorite-button:hover, .favorite-button.is-favorite { color: #c62828; }
+.favorite-button.is-favorite { border-color: #f1c4c4; background: #fff5f5; }
 .catalog-error { grid-column: 1 / -1; padding: 28px; border: 1px solid #e1e5e9; border-radius: 7px; background: #fff; text-align: center; }
 .catalog-error p { margin: 0 0 12px; font-size: 13px; }
 .guest-button { padding: 9px 18px; border: 1px solid #c9cfd5; border-radius: 5px; background: #fff; cursor: pointer; }
@@ -111,7 +119,8 @@ body.is-shopping .links-rodape { padding-top: 0; border: 0; }
 @keyframes reveal { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes bob { 50% { transform: translateY(-6px); } }
 @keyframes shimmer { to { background-position: -200% 0; } }
-@media (max-width: 800px) { .delivery { display: none; } .product-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 900px) { .topbar { display: flex; flex-wrap: wrap; gap: 8px 14px; padding-top: 8px; padding-bottom: 8px; } .delivery { display: none; } .search { order: 5; flex: 1 0 100%; } }
+@media (max-width: 800px) { .product-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 @media (max-width: 560px) {
   body { padding: 12px; }
   .caixa-login { padding: 20px 18px; }
@@ -121,7 +130,7 @@ body.is-shopping .links-rodape { padding-top: 0; border: 0; }
   .links-rodape { gap: 10px 14px; text-align: center; }
   .links-rodape a { font-size: 10px; }
   .topbar { flex-wrap: wrap; gap: 8px; padding: 9px 12px; }
-  .search { order: 3; flex-basis: 100%; }
+  .search { order: 5; flex-basis: 100%; }
   .account-label { margin-left: auto; }
   .subnav { gap: 14px; }
   .subnav a:nth-of-type(n+3), .nav-promo { display: none; }

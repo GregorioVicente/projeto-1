@@ -20,7 +20,7 @@
       <div class="account-label" id="account-label"><small>Olá</small><strong>Sua conta</strong></div>
       <button class="cart" id="cart-button" aria-label="Carrinho, 0 itens"><span>🛒</span><b id="cart-count">0</b><strong>Carrinho</strong></button>
     </header>
-    <nav class="subnav is-hidden" id="store-nav" aria-label="Navegação principal"><button type="button"><span>☰</span> Todas</button><a href="#ofertas">Ofertas do Dia</a><a href="#catalogo">Mais Vendidos</a><a href="#catalogo">Atendimento ao Cliente</a><a href="#catalogo">Eletrônicos</a><a href="#catalogo">Ideias para presente</a><span class="nav-promo">Ofertas para você</span></nav>
+    <nav class="subnav is-hidden" id="store-nav" aria-label="Navegação principal"><button type="button"><span>☰</span> Todas</button><a href="#ofertas">Ofertas do Dia</a><button type="button" class="nav-tab" id="favorites-tab" aria-pressed="false">♡ Favoritos <span id="favorites-count">0</span></button><a href="#catalogo">Mais Vendidos</a><a href="#catalogo">Atendimento ao Cliente</a><a href="#catalogo">Eletrônicos</a><a href="#catalogo">Ideias para presente</a><span class="nav-promo">Ofertas para você</span></nav>
 
     <main>
       <div class="bloco-central login-stage" id="login-stage">
@@ -46,7 +46,7 @@
 
       <section class="catalog-stage is-hidden" id="catalog-stage" aria-labelledby="catalog-title">
         <div class="welcome-banner"><div><p class="eyebrow">BEM-VINDO À AMAZON</p><h1 id="catalog-title">Um mundo de descobertas.</h1><p>Encontre seu próximo favorito entre produtos escolhidos para você.</p></div><div class="banner-art" aria-hidden="true"><span>✦</span><span>📦</span><i></i></div></div>
-        <div class="catalog-heading" id="ofertas"><div><p class="eyebrow">SELEÇÃO DA LOJA</p><h2>Explore nossos produtos</h2><p class="catalog-subtitle" id="results-count">Carregando produtos...</p><p class="form-message" id="search-message" role="alert"></p></div><div class="catalog-actions"><label class="sr-only" for="category-filter">Filtrar categoria</label><select id="category-filter"><option value="all">Todas as categorias</option></select><button id="logout-button" class="logout-button" type="button">Sair da conta</button></div></div>
+        <div class="catalog-heading" id="ofertas"><div><p class="eyebrow">SELEÇÃO DA LOJA</p><h2 id="section-title">Explore nossos produtos</h2><p class="catalog-subtitle" id="results-count">Carregando produtos...</p><p class="form-message" id="search-message" role="alert"></p></div><div class="catalog-actions"><label class="sr-only" for="category-filter">Filtrar categoria</label><select id="category-filter"><option value="all">Todas as categorias</option></select><button id="logout-button" class="logout-button" type="button">Sair da conta</button></div></div>
         <div class="product-grid" id="product-grid" aria-live="polite"></div>
         <div class="catalog-error is-hidden" id="catalog-error"><p>Não foi possível carregar os produtos agora.</p><button id="retry-button" class="guest-button" type="button">Tentar novamente</button></div>
         <p class="api-caption">Vitrine demonstrativa com dados públicos de produtos.</p>
